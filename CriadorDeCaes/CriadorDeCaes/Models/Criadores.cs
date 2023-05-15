@@ -42,16 +42,19 @@ namespace CriadorDeCaes.Models
         public string Morada { get; set; }
 
         /// <summary>
-        /// Código Portal da morada do criador
+        /// Código Postal da morada do criador
         /// </summary>
         [Required(ErrorMessage = "O {0} é de preenchimento obrigatório")]
         [Display(Name = "Código Postal")]
+        [RegularExpression("[1-9][0-9]{3}-[0-9]{3} [A-ZÇÁÉÍÓÚ]+[A-Z -ÁÉÍÓÚÇ]*", ErrorMessage = "O {0} deve ser escrito no formato XXXX-XXX NOME DA TERRA")]
         public string CodPostal { get; set; }
 
         /// <summary>
         /// Telemóvel do criador
         /// </summary>
         [Display(Name = "Telemóvel")]
+        [StringLength(9, MinimumLength = 9, ErrorMessage = "O {0} tem de ter {1} digitos")]
+        [RegularExpression("((+|00)[0-9]{2,5})?9[1236][0-9]{7}", ErrorMessage = "Tem de escrever um nº de {0} válido")]
         public string Telemovel { get; set; }
 
         /// <summary>
