@@ -101,6 +101,35 @@ namespace CriadorDeCaes.Controllers
                     // não escolhi o Criador
                     ModelState.AddModelError("", "Deve escolher o criador, por favor.");
                 }
+                else
+                {
+                    // se cheguei aqui é porque escolhi uma raça e um criador
+                    // vamos avaliar o fichiero, se é que ele existe
+                    if (fotografia == null)
+                    {
+                        // não há ficheiro (imagem)
+                        animal.ListaFotografias.Add(new Fotografias
+                        {
+                            Data = DateTime.Now,
+                            Local = "no image",
+                            Ficheiro = "noAnimal.jpg"
+                        });
+                    }
+                    else
+                    {
+                        // se chego aqui, existe ficheiro
+                        // mas será imagem?
+                        if (fotografia.ContentType != "image/jpeg" && fotografia.ContentType != "image/png")
+                        {
+                            // existe ficheiro, mas não é uma imagem
+                            ModelState.AddModelError("", "Forneceu um ficheiro que não é uma imagem. Escolha, por favor, um ficheiro do tipo PNG ou JPG.");
+                        }
+                        else
+                        {
+                            // há magem
+                        }
+                    }
+                }
             }
             try
             {
