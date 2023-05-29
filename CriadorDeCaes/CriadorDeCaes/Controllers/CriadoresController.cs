@@ -12,6 +12,9 @@ namespace CriadorDeCaes.Controllers
 {
     public class CriadoresController : Controller
     {
+        /// <summary>
+        /// Objetcto para referenciar a base de dados do projeto
+        /// </summary>
         private readonly ApplicationDbContext _context;
 
         public CriadoresController(ApplicationDbContext context)
@@ -22,7 +25,7 @@ namespace CriadorDeCaes.Controllers
         // GET: Criadores
         public async Task<IActionResult> Index()
         {
-              return View(await _context.Criadores.ToListAsync());
+            return View(await _context.Criadores.ToListAsync());
         }
 
         // GET: Criadores/Details/5
@@ -148,14 +151,14 @@ namespace CriadorDeCaes.Controllers
             {
                 _context.Criadores.Remove(criadores);
             }
-            
+
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool CriadoresExists(int id)
         {
-          return _context.Criadores.Any(e => e.Id == id);
+            return _context.Criadores.Any(e => e.Id == id);
         }
     }
 }

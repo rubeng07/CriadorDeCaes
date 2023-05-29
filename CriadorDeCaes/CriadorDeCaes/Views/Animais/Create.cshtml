@@ -9,7 +9,8 @@
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="Create">
+        @* no formulário é necessário especificar a opção enctype="multiformat/form-data para garantir que o formulário exporta ficheiros" *@
+        <form asp-action="Create" enctype="multipart/form-data" >
 
             @* zona para mostrar as mensagens de erro *@
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
@@ -58,6 +59,12 @@
                 <select asp-for="CriadorFK" class ="form-control" asp-items="ViewBag.CriadorFK">
                     <option value="0">Escolha, pf, um criador</option>
                 </select>
+            </div>
+
+            @* 'file picker' para efetuar a submissão de uma imagem *@
+            <div class="form-group">
+                <label class="control-label">Fotografia</label>
+                <input type="file" accept=".png,.jpg,.jpeg" name="fotografia" />
             </div>
 
             <br />

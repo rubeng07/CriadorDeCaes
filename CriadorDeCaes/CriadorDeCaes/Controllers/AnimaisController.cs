@@ -77,7 +77,7 @@ namespace CriadorDeCaes.Controllers
         public IActionResult Create()
         {
             ViewData["CriadorFK"] = new SelectList(_context.Criadores, "Id", "Nome");
-            ViewData["RacaFK"] = new SelectList(_context.Racas.OrderBy(r=>r.Nome), "Id", "Nome");
+            ViewData["RacaFK"] = new SelectList(_context.Racas.OrderBy(r => r.Nome), "Id", "Nome");
             return View();
         }
 
@@ -86,17 +86,42 @@ namespace CriadorDeCaes.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Nome,Sexo,DataNasc,DataCompra,RegistoLOP,RacaFK,CriadorFK")] Animais animais)
+        public async Task<IActionResult> Create([Bind("Id,Nome,Sexo,DataNasc,DataCompra,RegistoLOP,RacaFK,CriadorFK")] Animais animal, IFormFile fotografia)
         {
-            if (ModelState.IsValid)
+            if (animal.RacaFK == 0)
             {
-                _context.Add(animais);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                // não escolhi uma raça.
+                // gerar mensagem de erro
+                ModelState.AddModelError("", "Deve escolher uma raça, por favor.");
             }
-            ViewData["CriadorFK"] = new SelectList(_context.Criadores, "Id", "CodPostal", animais.CriadorFK);
-            ViewData["RacaFK"] = new SelectList(_context.Racas, "Id", "Id", animais.RacaFK);
-            return View(animais);
+            else
+            {
+                if (animal.CriadorFK == 0)
+                {
+                    // não escolhi o Criador
+                    ModelState.AddModelError("", "Deve escolher o criador, por favor.");
+                }
+            }
+            try
+            {
+                if (ModelState.IsValid)
+                {
+                    _context.Add(animal);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
+                }
+            }
+            catch (Exception)
+            {
+                ModelState.AddModelError("", "Ocorreu um erro no acesso à base de dados...");
+                //    throw;
+            }
+
+            // preparar os dados para serem devolvidos para a View
+
+            ViewData["CriadorFK"] = new SelectList(_context.Criadores, "Id", "Nome", animal.CriadorFK);
+            ViewData["RacaFK"] = new SelectList(_context.Racas.OrderBy(r => r.Nome), "Id", "Nome", animal.RacaFK);
+            return View(animal);
         }
 
         // GET: Animais/Edit/5
@@ -188,14 +213,14 @@ namespace CriadorDeCaes.Controllers
             {
                 _context.Animais.Remove(animais);
             }
-            
+
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool AnimaisExists(int id)
         {
-          return _context.Animais.Any(e => e.Id == id);
+            return _context.Animais.Any(e => e.Id == id);
         }
     }
 }

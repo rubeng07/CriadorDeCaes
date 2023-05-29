@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CriadorDeCaes.Models
 {
@@ -8,11 +10,12 @@ namespace CriadorDeCaes.Models
     public class Animais
     {
         public Animais()
-        { 
+        {
             // inicializar a lista de Fotografias
             // associada ao cão/cadela
-            ListaFotografias=new HashSet<Fotografias>();
+            ListaFotografias = new HashSet<Fotografias>();
         }
+
         /// <summary>
         /// PK
         /// </summary>
@@ -33,17 +36,20 @@ namespace CriadorDeCaes.Models
         /// <summary>
         /// Data de nascimento do animal
         /// </summary>
+        [Display(Name = "Data de nascimento")]
         public DateTime DataNasc { get; set; }
 
         /// <summary>
         /// Dada de compra do animal
         /// Se nulo, o animal nasceu nas instalações do criador
         /// </summary>
+        [Display(Name = "Data de compra")]
         public DateTime DataCompra { get; set; }
 
         /// <summary>
         /// Número de registo no LOP
         /// </summary>
+        [Display(Name = "Registo LOP")]
         public string RegistoLOP { get; set; }
 
         // *******************************************
@@ -59,15 +65,19 @@ namespace CriadorDeCaes.Models
         /// FK para a identificação da Raça do animal
         /// </summary>
         [ForeignKey(nameof(Raca))]
+        [Display(Name = "Raça")]
         public int RacaFK { get; set; }
+
+        [Display(Name = "Raça")]
         public Racas Raca { get; set; }
 
         /// <summary>
         /// FK para o Criador dono do Animal
         /// </summary>
         [ForeignKey(nameof(Criador))]
+        [Display(Name = "Criador")]
         public int CriadorFK { get; set; }
-        public Criadores Criador { get; set; }
 
+        public Criadores Criador { get; set; }
     }
 }
