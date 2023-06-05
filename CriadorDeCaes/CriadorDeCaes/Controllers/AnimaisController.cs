@@ -17,9 +17,15 @@ namespace CriadorDeCaes.Controllers
         /// </summary>
         private readonly ApplicationDbContext _context;
 
-        public AnimaisController(ApplicationDbContext context)
+        /// <summary>
+        /// objeto com os dados do servidor web
+        /// </summary>
+        private readonly IWebHostEnvironment _environment;
+
+        public AnimaisController(ApplicationDbContext context, IWebHostEnvironment environment)
         {
             _context = context;
+            _environment = environment;
         }
 
         // GET: Animais
@@ -88,6 +94,9 @@ namespace CriadorDeCaes.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Nome,Sexo,DataNasc,DataCompra,RegistoLOP,RacaFK,CriadorFK")] Animais animal, IFormFile fotografia)
         {
+            // vars auxiliares
+            bool existeFoto = false;
+            string nomeFoto = "";
             if (animal.RacaFK == 0)
             {
                 // não escolhi uma raça.
@@ -122,11 +131,37 @@ namespace CriadorDeCaes.Controllers
                         if (fotografia.ContentType != "image/jpeg" && fotografia.ContentType != "image/png")
                         {
                             // existe ficheiro, mas não é uma imagem
-                            ModelState.AddModelError("", "Forneceu um ficheiro que não é uma imagem. Escolha, por favor, um ficheiro do tipo PNG ou JPG.");
+                            // ModelState.AddModelError("", "Forneceu um ficheiro que não é uma imagem. Escolha, por favor, um ficheiro do tipo PNG ou JPG.");
+                            animal.ListaFotografias.Add(new Fotografias
+                            {
+                                Data = DateTime.Now,
+                                Local = "no image",
+                                Ficheiro = "noAnimal.jpg"
+                            });
                         }
                         else
                         {
-                            // há magem
+                            // há imagem
+                            existeFoto = true;
+                            // definir o nome do ficheiro
+                            Guid g = Guid.NewGuid();
+                            nomeFoto = animal.CriadorFK + "_" + g.ToString();
+                            string extensao = Path.GetExtension(fotografia.FileName).ToLower();
+                            nomeFoto += extensao;
+
+                            // onde o guardar?
+                            //    vamos guardar o ficheiro na pasta 'wwwroot'
+                            //    mas apenas após guardarmos os dados do animal
+                            //    na BD
+
+                            // guardar os dados do ficheiro na BD
+                            animal.ListaFotografias
+                                  .Add(new Fotografias
+                                  {
+                                      Ficheiro = nomeFoto,
+                                      Local = "",
+                                      Data = DateTime.Now
+                                  });
                         }
                     }
                 }
@@ -135,8 +170,32 @@ namespace CriadorDeCaes.Controllers
             {
                 if (ModelState.IsValid)
                 {
+                    // adicionar os dados do 'animal'
+                    // à BD. Mas, apenas na memória do
+                    // servidor web
                     _context.Add(animal);
+                    //transferir os dados para a BD
                     await _context.SaveChangesAsync();
+
+                    // se cheguei aqui, vamos guardar o ficheiro
+                    // no disco rígido
+                    if (existeFoto)
+                    {
+                        // determinar o local onde a foto será guardada
+                        string nomePastaOndeVouGuardarFotografia = _environment.WebRootPath;
+                        // juntar o nome da pastas onde serão guardadas as imagens
+                        nomePastaOndeVouGuardarFotografia = Path.Combine(nomePastaOndeVouGuardarFotografia, "imagens");
+                        // mas, a pasta existe?
+                        if (!Directory.Exists(nomePastaOndeVouGuardarFotografia))
+                        {
+                            Directory.CreateDirectory(nomePastaOndeVouGuardarFotografia);
+                        }
+                        // vamos iniciar a escrita do ficheiro no disco rígido
+                        nomeFoto = Path.Combine(nomePastaOndeVouGuardarFotografia, nomeFoto);
+                        using var stream = new FileStream(nomeFoto, FileMode.Create);
+                        await fotografia.CopyToAsync(stream);
+                    }
+
                     return RedirectToAction(nameof(Index));
                 }
             }
